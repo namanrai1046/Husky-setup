@@ -4,40 +4,55 @@
   become: yes
   become_method: sudo
   tasks:
-  - name: "Update Repository cache"
-    apt:
-      update_cache: true
-      cache_valid_time: 3600
-      force_apt_get: true
-  - name: install Docker
-    apt:
-      name: docker.io
-      state: latest
-  - name: install Docker compose
-    apt:
-      name: docker-compose
+    - name: "Update Repository cache"
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+        force_apt_get: true
+    - name: install Docker
+      apt:
+        name: docker.io
+        state: latest
+    - name: install Docker compose
+      apt:
+        name: docker-compose
 
-  - name: Example clone of a single branch
-    ansible.builtin.git:
-      repo: https://github.com/namanrai1046/mern-ansible.git
-      dest: /src/mern-ansible
-      
-  # - name: ZIP
-  #   apt:
-  #     name: zip
-  # - name: Copy zipped source code folder to server
-  #   copy:
-  #     src: ../mern-todo.zip
-  #     dest: /home/ubuntu/mern-todo.zip
-  # - name: unzip souce code folder
-  #   unarchive:
-  #     src: /home/ubuntu/mern-todo.zip
-  #     dest: /home/ubuntu/
-  #     remote_src: yes
-  - name: building container
-    args:
-      chdir: /src/mern-ansible/mern-todo
-    shell:
-      docker-compose build && docker-compose up -d
+    - name: clone master branch
+      ansible.builtin.git:
+        repo: https://github.com/namanrai1046/Husky-setup.git
+        dest: /src/mern-todo
+        single_branch: yes
+        version: master
+        register: result
+        ignore_errors: true
 
-  
+    - name: Run only if the git clone fails
+      ansible.builtin.git:
+        repo: https://github.com/namanrai1046/Husky-setup.git
+        dest: /src/mern-todo
+        refspec: "+refs/pull/*:refs/heads/*"
+      when: result is failed
+    # husky check
+    # tasks:
+
+    # - name: Change the working directory to somedir/ before executing the command
+    #   ansible.builtin.shell:
+    #   args:
+    #     chdir: /src/mern-todo
+
+    # - name: ZIP
+    #   apt:
+    #     name: zip
+    # - name: Copy zipped source code folder to server
+    #   copy:
+    #     src: ../mern-todo.zip
+    #     dest: /home/ubuntu/mern-todo.zip
+    # - name: unzip souce code folder
+    #   unarchive:
+    #     src: /home/ubuntu/mern-todo.zip
+    #     dest: /home/ubuntu/
+    #     remote_src: yes
+    - name: building container
+      args:
+        chdir: /src/mern-ansible/mern-todo
+      shell: docker-compose build && docker-compose up -d
