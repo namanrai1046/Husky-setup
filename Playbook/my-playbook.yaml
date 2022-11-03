@@ -32,7 +32,15 @@
         dest: /src/mern-todo
         refspec: "+refs/pull/*:refs/heads/*"
       when: result is failed
+      
     # husky check
+    - name: Change the working directory and install npm husky
+      ansible.builtin.shell:
+      args:
+        chdir: /src/mern-todo/client
+        cmd: npm i | npm husky | npm start -d
+        chdir: /src/mern-todo/server
+        cmd: npm i | npm husky | npm start -d
     # tasks:
 
     # - name: Change the working directory to somedir/ before executing the command
